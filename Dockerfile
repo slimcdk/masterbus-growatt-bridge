@@ -1,0 +1,36 @@
+# Use a lightweight Debian-based image with Python pre-installed
+FROM python:3.11-slim-bullseye
+
+# Set environment variables for non-interactive installations
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# Install required system packages:
+# 1. build-essential: Needed to compile python-can and cantools dependencies
+# 2. libsocketcan2: Library for SocketCAN support
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    libsocketcan2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory inside the container
+WORKDIR /usr/src/app
+
+# Copy the Python script and the DBC file into the container
+# NOTE: Ensure your Python script is named 'can_bridge_full.py' 
+# and your DBC file is named 'pylon_CAN_210124.dbc' in the host directory.
+COPY bridge.py .
+COPY pylon_CAN_210124.dbc .
+
+# Install Python dependencies:
+# 1. python-can: The CAN communication library
+# 2. cantools: For parsing the DBC file and encoding/decoding messages
+RUN pip install --no-cache-dir python-can cantools
+
+# Clean up build dependencies after installation
+RUN apt-get purge -y build-essential && apt-get autoremove -y
+
+# Command to run the application
+# We use 'exec' form to ensure the script runs as PID 1
+CMD ["python", "bridge.py"]
