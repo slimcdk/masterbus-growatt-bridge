@@ -276,14 +276,24 @@ def get_monitoring_field_value(device_id: int, field_id: int):
     value_ptr = libmasterbus.masterbus_monitoring_field_value(get_ctx(), device_id, field_id)
     return process_value(value_ptr, device_id, field_id)
 
-@app.post("/api/devices/{device_id}/fields/{field_id}/set_boolean", summary="Set a boolean value or trigger an event")
+@app.post("/api/devices/{device_id}/fields/{field_id}/set_boolean", summary="Set a boolean value")
 def set_boolean_value(device_id: int, field_id: int, req_body: SetBooleanRequest):
     """
-    Sets the value for a boolean field or triggers an event-based field.
-    This is used for commands like opening/closing relays.
+    Sets the value for a boolean field that holds a state (on/off).
+    For triggering event-based actions like relays, use the /trigger endpoint.
     The library returns the new state of the value after setting it.
     """
     value_ptr = libmasterbus.masterbus_set_boolean(get_ctx(), device_id, field_id, req_body.value)
+    return process_value(value_ptr, device_id, field_id)
+
+@app.post("/api/devices/{device_id}/fields/{field_id}/trigger", summary="Trigger an event field")
+def trigger_event(device_id: int, field_id: int):
+    """
+    Triggers an event-based field, such as 'Open relay' or 'Close relay'.
+    This action does not require a request body. The library is called with a 'true' value
+    to initiate the event. The returned value represents the new state.
+    """
+    value_ptr = libmasterbus.masterbus_set_boolean(get_ctx(), device_id, field_id, True)
     return process_value(value_ptr, device_id, field_id)
 
 if __name__ == "__main__":
