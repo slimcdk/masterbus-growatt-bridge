@@ -1,0 +1,17 @@
+services:
+  masterbus-http-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    network_mode: host
+    restart: unless-stopped
+
+  inverter-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile.bridge
+    network_mode: host
+    depends_on:
+      - masterbus-http-api
+    restart: unless-stopped
+    

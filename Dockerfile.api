@@ -1,0 +1,19 @@
+FROM arm32v7/python:3 AS deps
+
+WORKDIR /app
+RUN pip install --no-cache-dir python-can cantools fastapi uvicorn
+
+FROM deps AS run
+
+WORKDIR /app
+
+COPY libmasterbus.so /usr/local/lib/
+COPY pylon_CAN_210124.dbc api.py .
+
+
+# Ensure the system linker can find the library (if not in /usr/local/lib)
+# ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+# RUN pip install --no-cache-dir python-can cantools
+
+CMD ["python", "api.py"]

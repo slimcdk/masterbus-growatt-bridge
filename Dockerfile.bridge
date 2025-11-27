@@ -26,7 +26,7 @@ COPY pylon_CAN_210124.dbc .
 # Install Python dependencies:
 # 1. python-can: The CAN communication library
 # 2. cantools: For parsing the DBC file and encoding/decoding messages
-RUN pip install --no-cache-dir python-can cantools
+RUN pip install --no-cache-dir python-can cantools requests
 
 # Clean up build dependencies after installation
 RUN apt-get purge -y build-essential && apt-get autoremove -y
